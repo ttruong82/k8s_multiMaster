@@ -1,0 +1,28 @@
+---
+- hosts: masters,workers,etcds
+  any_errors_fatal: true
+  gather_facts: true
+  become: yes
+  tasks:
+  - name: Allow passwordless sudo
+    lineinfile:
+      dest: /etc/sudoers
+      line: 'ubuntu ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+
+
+- name: Install common packages
+  hosts: masters,workers,etcds
+  environment:
+    http_proxy: http://192.168.0.2:8888
+    https_proxy: http://192.168.0.2:8888
+  roles:
+    - common
+
+- name: Setup etcd
+  hosts: etcds
+  environment:
+    http_proxy: http://192.168.0.2:8888
+    https_proxy: http://192.168.0.2:8888
+  roles:
+    - etcd

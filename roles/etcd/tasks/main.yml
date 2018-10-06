@@ -1,0 +1,41 @@
+# Tasks for all etcd servers
+#
+- name: Install etcd
+  apt:
+    name: etcd
+    state: present
+    update_cache: true
+
+- name: create remote SSL dir
+  file:
+    path: /etc/etcd/ssl
+    state: directory
+    mode: 0755
+
+- name: copy ca cert file
+  copy:
+    src: "{{ ansible_hostname }}.crt"
+    dest:  "/etc/etcd/ssl/{{ ansible_hostname }}.crt"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: copy crt file
+  copy:
+    src: "{{ ansible_hostname }}.ca.crt"
+    dest:  "/etc/etcd/ssl/{{ ansible_hostname }}.ca.crt"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: copy key file
+  copy:
+    src: "{{ ansible_hostname }}.key.insecure"
+    dest:  "/etc/etcd/ssl/{{ ansible_hostname }}.key.insecure"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create Service file
+  template: src=etcd.service.j2 dest=/etc/systemd/system/etcd.service
+  notify: restart etcd

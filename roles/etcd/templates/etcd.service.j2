@@ -1,0 +1,38 @@
+[Unit]
+Description=etcd
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+#basic config
+Environment=ETCD_DATA_DIR=/var/lib/etcd
+Environment=ETCD_NAME={{ ansible_hostname }}
+Environment=ETCD_LISTEN_PEER_URLS=https://{{ ansible_ens3.ipv4.address }}:2380
+Environment=ETCD_LISTEN_CLIENT_URLS=https://{{ ansible_ens3.ipv4.address }}:2379
+Environment=ETCD_ADVERTISE_CLIENT_URLS=https://{{ ansible_ens3.ipv4.address }}:2379
+
+#initial cluster configuration
+Environment=ETCD_INITIAL_CLUSTER=etcd1=https://192.168.0.3:2380,etcd2=https://192.168.0.4:2380,etcd3=https://192.168.0.5:2380
+Environment=ETCD_INITIAL_CLUSTER_TOKEN=your-unique-token
+Environment=ETCD_INITIAL_CLUSTER_STATE=new
+Environment=ETCD_INITIAL_ADVERTISE_PEER_URLS=https://{{ ansible_ens3.ipv4.address }}:2380
+
+#security
+Environment=ETCD_TRUSTED_CA_FILE=/etc/etcd/ssl/{{ ansible_hostname }}.ca.crt
+Environment=ETCD_CERT_FILE=/etc/etcd/ssl/{{ ansible_hostname }}.crt
+Environment=ETCD_KEY_FILE=//etc/etcd/ssl/{{ ansible_hostname }}.key.insecure
+Environment=ETCD_CLIENT_CERT_AUTH=1
+
+Environment=ETCD_PEER_TRUSTED_CA_FILE=/etc/etcd/ssl/{{ ansible_hostname }}.ca.crt
+Environment=ETCD_PEER_CERT_FILE=/etc/etcd/ssl/{{ ansible_hostname }}.crt
+Environment=ETCD_PEER_KEY_FILE=/etc/etcd/ssl/{{ ansible_hostname }}.key.insecure
+Environment=ETCD_PEER_CLIENT_CERT_AUTH=1
+
+#tuning see https://github.com/coreos/etcd/ssl/blob/master/Documentation/tuning.md
+Environment=ETCD_HEARTBEAT_INTERVAL=100
+Environment=ETCD_ELECTION_TIMEOUT=2500
+
+ExecStart=/usr/bin/etcd
+Restart=always

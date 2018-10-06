@@ -1,0 +1,7 @@
+# Restart Docker if config changed.
+- name: restart etcd
+  systemd:
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+    name: etcd
